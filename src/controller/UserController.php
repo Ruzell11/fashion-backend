@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 
 class UserController {
     private $pdo;
@@ -18,24 +18,28 @@ class UserController {
         $email = $data['email'];
         $password = password_hash($data['password'], PASSWORD_DEFAULT); 
     
+        // Generate a random user ID (e.g., between 100000 and 999999)
+        $userId = random_int(100000, 999999);
+    
         // Prepare SQL statement to prevent SQL injection
-        $stmt = $this->pdo->prepare('INSERT INTO users (username, email, password) VALUES (:username, :email, :password)');
+        $stmt = $this->pdo->prepare('INSERT INTO users (id, username, email, password) VALUES (:id, :username, :email, :password)');
     
         try {
-            // Execute the statement
-            $stmt->execute(['username' => $username, 'email' => $email, 'password' => $password]);
+            // Execute the statement with the random user ID
+            $stmt->execute(['id' => $userId, 'username' => $username, 'email' => $email, 'password' => $password]);
             http_response_code(201);
-            return json_encode(['message' => 'User signed up successfully.']);
+            return json_encode(['message' => 'User signed up successfully.', 'user_id' => $userId]);
         } catch (PDOException $e) {
             if ($e->getCode() === '23000') { // Unique constraint violation
                 http_response_code(409);
-                return json_encode(['message' => 'Username or email already taken.']);
+                return json_encode(['message' => 'Username, email, or ID already taken.']);
             } else {
                 http_response_code(500);
                 return json_encode(['message' => 'Internal server error.']);
             }
         }
     }
+    
 
     public function login($data) {
         if (!isset($data['email']) || !isset($data['password'])) {
@@ -56,6 +60,8 @@ class UserController {
             if ($user && password_verify($password, $user['password'])) {
        
                 $_SESSION['user_id'] = $user['id'];
+
+       
                 $_SESSION['email'] = $user['email'];
     
                 http_response_code(200);
@@ -70,5 +76,36 @@ class UserController {
             return json_encode(['message' => 'Internal server error.']);
         }
     }
+
+    public function isAuthenticated($user_id, $pdo) {
+
+        var_dump($user_id);
+        // Prepare SQL statement to find the user by user_id
+        $stmt = $pdo->prepare('SELECT * FROM users WHERE id = :user_id LIMIT 1');
+    
+        try {
+            // Execute the statement with the provided user_id
+            $stmt->execute(['user_id' => (int) $user_id]);
+            
+            // Fetch the result
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            var_dump(!empty($user));
+            
+            // Check if a user was found
+            if (!empty($user)) {
+                return true; // User exists
+            } else {
+                return false; // User does not exist
+            }
+        } catch (PDOException $e) {
+            // Handle any potential errors (e.g., log error)
+            error_log("Error in isAuthenticated: " . $e->getMessage());
+            return false; // Return false if an error occurs
+        }
+    }
+    
     
 }
+
+

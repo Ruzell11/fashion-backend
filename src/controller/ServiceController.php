@@ -16,19 +16,14 @@ class ServiceController {
     }
 
     public function proceedToCheckout($formData) {
-    
-        // Check if user is logged in
-        if (!isset($_SESSION['user_id'])) {
-            http_response_code(401);
-            return json_encode(['message' => 'Unauthorized: Please login to proceed to checkout.']);
-        }
-    
-        $userId = $_SESSION['user_id'];
+
     
         // Validate input data
+        $userId = $formData['user_id'];
         $customerName = $formData['customer_name'] ?? null;
         $phoneNumber = $formData['phone_number'] ?? null;
         $serviceId = $formData['service_id'] ?? null;
+        $appointmentDate = $formData['appointment_date'] ?? null;
     
         if (empty($customerName) || empty($phoneNumber) || empty($serviceId)) {
             http_response_code(400);
@@ -49,7 +44,7 @@ class ServiceController {
         // Check availability (custom logic can be added here)
         if ($this->isServiceAvailable($serviceId)) {
             // Proceed with creating the appointment
-            $this->createAppointment($userId, $customerName, $phoneNumber, $service, $appointmentDate);
+            $this->createAppointment($userId, $customerName, $phoneNumber, $serviceId, $appointmentDate);
             return json_encode(['message' => 'Appointment booked successfully for service: ' . $service['service_name']]);
         } else {
             return json_encode(['message' => 'Service "' . $service['service_name'] . '" is not available.']);
@@ -61,15 +56,15 @@ class ServiceController {
         return true;  // Assume the service is available for this example
     }
     
-    private function createAppointment($userId, $customerName, $phoneNumber, $service) {
+    private function createAppointment($userId, $customerName, $phoneNumber, $serviceId, $appointmentDate) {
         // Logic to create an appointment in the appointments table
-        $sql = "INSERT INTO appointments (user_id, customer_name, phone_number, service_id, appointment_date) VALUES (:user_id, :customer_name, :phone_number, :service_id, NOW())";
+        $sql = "INSERT INTO appointments (user_id, customer_name, phone_number, service_id, appointment_date) VALUES (:user_id, :customer_name, :phone_number, :service_id, :appointment_date)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             'user_id' => $userId,
             'customer_name' => $customerName,
             'phone_number' => $phoneNumber,
-            'service_id' => $service['service_id'],
+            'service_id' => $serviceId,
             'appointment_date' => $appointmentDate  
         ]);
     }
