@@ -94,7 +94,7 @@ class ServiceController {
         try {
             // Prepare SQL statement to fetch appointments for a specific user
             $sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, 
-                           s.service_name, u.username 
+                           s.service_name, s.service_id, u.username 
                     FROM appointments a
                     JOIN salon_services s ON a.service_id = s.service_id
                     JOIN users u ON a.user_id = u.id
