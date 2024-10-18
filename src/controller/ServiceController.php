@@ -139,6 +139,24 @@ class ServiceController {
             return json_encode(['error' => 'Failed to delete appointment. Please try again later.']);
         }
     }
+
+
+    public function editAppointment($appointmentId, $phoneNumber, $serviceId, $appointmentDate) {
+        // Logic to update an appointment in the appointments table without changing the user_id or customer_name
+        $sql = "UPDATE appointments 
+                SET phone_number = :phone_number, 
+                    service_id = :service_id, 
+                    appointment_date = :appointment_date 
+                WHERE appointment_id = :appointment_id";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'phone_number' => $phoneNumber,
+            'service_id' => $serviceId,
+            'appointment_date' => $appointmentDate,
+            'appointment_id' => $appointmentId
+        ]);
+    }
     
 
 }

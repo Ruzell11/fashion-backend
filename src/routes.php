@@ -138,6 +138,28 @@ case '/sign-up':
                             echo json_encode(['message' => 'Method not allowed.']);
                         }
                         break;
+                        
+
+                        case '/appointment':
+                            if ($requestMethod === 'PATCH') {
+                                // Check if user is logged in by checking for a session or query parameter
+                                $data = json_decode(file_get_contents('php://input'), true);
+                        
+                                // if (!$user_id) {
+                                //     http_response_code(401);
+                                //     echo json_encode(['message' => 'Unauthorized: Please login or provide a user ID to access this resource']);
+                                //     exit;
+                                // }
+                        
+         
+                                $serviceController = new ServiceController($pdo);
+                                $response = $serviceController->editAppointment($data); 
+                                echo $response;
+                            } else {
+                                http_response_code(405);
+                                echo json_encode(['message' => 'Method not allowed.']);
+                            }
+                            break;
 
                         case '/appointment/cancel':
                             if ($requestMethod === 'DELETE') {
