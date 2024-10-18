@@ -121,13 +121,13 @@ case '/sign-up':
                     case '/appointment':
                         if ($requestMethod === 'GET') {
                             // Check if user is logged in by checking for a session or query parameter
-                            $user_id = $_SESSION['user_id'] ?? $_GET['user_id'] ?? null;
+                            $user_id = $_GET['user_id'];
                     
-                            if (!$user_id) {
-                                http_response_code(401);
-                                echo json_encode(['message' => 'Unauthorized: Please login or provide a user ID to access this resource']);
-                                exit;
-                            }
+                            // if (!$user_id) {
+                            //     http_response_code(401);
+                            //     echo json_encode(['message' => 'Unauthorized: Please login or provide a user ID to access this resource']);
+                            //     exit;
+                            // }
                     
                             // Initialize the service controller and fetch appointments based on the user ID
                             $serviceController = new ServiceController($pdo);
