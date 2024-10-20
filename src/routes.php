@@ -190,6 +190,27 @@ case '/sign-up':
                                 echo json_encode(['message' => 'Method not allowed.']);
                             }
                             break;
+
+                            case '/appointment/done':
+                                if ($requestMethod === 'PATCH') {
+                                    // Get the data from the request body
+                                    $data = json_decode(file_get_contents('php://input'), true);
+                            
+                                    // Check if appointment_id is provided
+                                    if (isset($data['appointment_id'])) {
+                                        // Create an instance of your controller
+                                        $serviceController = new ServiceController($pdo);
+                                        $response = $serviceController->markAppointmentAsDone($data['appointment_id']);
+                                        echo $response;
+                                    } else {
+                                        http_response_code(400);
+                                        echo json_encode(['message' => 'Bad Request: appointment_id is required.']);
+                                    }
+                                } else {
+                                    http_response_code(405);
+                                    echo json_encode(['message' => 'Method not allowed.']);
+                                }
+                                break;
         
 // Add other routes here
 case '/':

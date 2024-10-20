@@ -65,7 +65,7 @@ class ServiceController {
             'customer_name' => $customerName,
             'phone_number' => $phoneNumber,
             'service_id' => $serviceId,
-            'appointment_date' => $appointmentDate  
+            'appointment_date' => $appointmentDate 
         ]);
     }
     
@@ -171,7 +171,22 @@ class ServiceController {
         // Optionally, return a success message or the number of rows affected
         return json_encode(['message' => 'Appointment updated successfully.']);
     }
-    
-    
 
+    public function markAppointmentAsDone($appointmentId) {
+        // Logic to update the is_done status in the appointments table
+        $sql = "UPDATE appointments SET is_done = 1 WHERE appointment_id = :appointment_id";
+    
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['appointment_id' => $appointmentId]);
+    
+        // Check if the row was updated
+        if ($stmt->rowCount() > 0) {
+            return json_encode(['message' => 'Appointment marked as done.']);
+        } else {
+            return json_encode(['message' => 'No appointment found with the provided ID.']);
+        }
+    }
+    
 }
+
+
