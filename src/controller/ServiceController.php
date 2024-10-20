@@ -141,22 +141,37 @@ class ServiceController {
     }
 
 
-    public function editAppointment($appointmentId, $phoneNumber, $serviceId, $appointmentDate) {
-        // Logic to update an appointment in the appointments table without changing the user_id or customer_name
+    public function editAppointment($data) {
+        // Extract data from the input array
+        $customerName = $data['customer_name'];
+        $phoneNumber = $data['phone_number'];
+        $serviceId = $data['service_id'];
+        $appointmentDate = $data['appointment_date'];
+        $appointmentId = $data['appointment_id'];
+    
+        // SQL query to update the appointment
         $sql = "UPDATE appointments 
                 SET phone_number = :phone_number, 
+                    customer_name = :customer_name,
                     service_id = :service_id, 
                     appointment_date = :appointment_date 
-                WHERE appointment_id = :appointment_id";
+                WHERE id = :appointment_id";
         
         $stmt = $this->pdo->prepare($sql);
+        
+        // Execute the statement with the extracted data
         $stmt->execute([
+            'customer_name' => $customerName,
             'phone_number' => $phoneNumber,
             'service_id' => $serviceId,
             'appointment_date' => $appointmentDate,
             'appointment_id' => $appointmentId
         ]);
+    
+        // Optionally, return a success message or the number of rows affected
+        return json_encode(['message' => 'Appointment updated successfully.']);
     }
+    
     
 
 }

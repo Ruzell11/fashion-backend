@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: http://localhost:5501");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT, PATCH");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json');
 
@@ -93,7 +93,7 @@ case '/sign-up':
                     
                     
 
-                    
+                        
                 } else {
                     http_response_code(405);
                     echo json_encode(['message' => 'Method not allowed.']);
@@ -140,7 +140,7 @@ case '/sign-up':
                         break;
                         
 
-                        case '/appointment':
+                        case '/appointment/edit':
                             if ($requestMethod === 'PATCH') {
                                 // Check if user is logged in by checking for a session or query parameter
                                 $data = json_decode(file_get_contents('php://input'), true);
@@ -164,14 +164,15 @@ case '/sign-up':
                         case '/appointment/cancel':
                             if ($requestMethod === 'DELETE') {
                                 // Check if user is logged in
-                                if (!isset($_SESSION['user_id'])) {
-                                    http_response_code(401);
-                                    echo json_encode(['message' => 'Unauthorized: Please login to access this resource']);
-                                    exit;
-                                }
+                                // if (!isset($_SESSION['user_id'])) {
+                                //     http_response_code(401);
+                                //     echo json_encode(['message' => 'Unauthorized: Please login to access this resource']);
+                                //     exit;
+                                // }
                         
                                 // Get the appointment ID from the query string (or body if sent in DELETE payload)
-                                $appointment_id = $_GET['appointment_id'] ?? null;
+                                $data = json_decode(file_get_contents('php://input'), true);
+                                $appointment_id = $data['appointment_id'] ?? null;
                         
                                 if (!$appointment_id) {
                                     http_response_code(400);
