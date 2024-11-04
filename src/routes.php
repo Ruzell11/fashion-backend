@@ -13,6 +13,7 @@ exit;
 require_once './src/database.php';
 require_once './src/controller/UserController.php';
 require_once './src/controller/ServiceController.php';
+require_once './src/controller/PaymentGateway.php';
 
 // Connect to the database
 $pdo = connectDatabase();
@@ -20,6 +21,11 @@ if (!$pdo) {
 http_response_code(500);
 echo json_encode(['message' => 'Database connection failed.']);
 exit;
+}
+
+if (file_exists(__DIR__ . '/.env')) {
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
 }
 
 
@@ -202,6 +208,58 @@ case '/sign-up':
                                         $serviceController = new ServiceController($pdo);
                                         $response = $serviceController->markAppointmentAsDone($data['appointment_id']);
                                         echo $response;
+                                    } else {
+                                        http_response_code(400);
+                                        echo json_encode(['message' => 'Bad Request: appointment_id is required.']);
+                                    }
+                                } else {
+                                    http_response_code(405);
+                                    echo json_encode(['message' => 'Method not allowed.']);
+                                }
+                                break;
+
+                            case '/payment':
+                                if ($requestMethod === 'POST') {
+                                    // Get the data from the request body
+                                    $data = json_decode(file_get_contents('php://input'), true);
+
+                                    if (isset($data['appointment_id'])) {
+                                       
+                                        $serviceController = new ServiceController($pdo);
+                                        $appointmentDetailsJson = $serviceController->getAppointmentById($data['appointment_id']);
+                                        $appointmentDetails = json_decode($appointmentDetailsJson, true);
+
+                                       
+                                        if (isset($appointmentDetailsJson)) {
+                                            // Prepare payment details
+                                            $amount = $data['amount'];
+                                            $name = 'Service ' . $appointmentDetails['service_name'] . rand(1, 1000000);
+                                            $currency = 'PHP'; 
+                                            $description = 'Payment for Appointment ID: ' . $appointmentDetails['service_name'];
+                                            $successUrl = 'http://127.0.0.1:5501/success.html'; 
+                                            $cancelUrl = 'http://127.0.0.1:5501/cancel.html';
+                                        
+                                            
+                                            // Create an instance of PaymentGateway
+                                            $paymentGateway = new PaymentGateway(); 
+                                            
+                                            // Create a Checkout Session
+                                            $checkoutSession = $paymentGateway->createCheckoutSession(
+                                                $amount,
+                                                $currency,
+                                                $description,
+                                                $successUrl,
+                                                $cancelUrl,
+                                                $name
+                                            );
+                            
+                                            // Output the checkout session response
+                                            echo json_encode($checkoutSession);
+                                        } else {
+                                            // Handle unsuccessful appointment marking
+                                            http_response_code(400);
+                                            echo json_encode(['message' => 'Failed to mark appointment as done.']);
+                                        }
                                     } else {
                                         http_response_code(400);
                                         echo json_encode(['message' => 'Bad Request: appointment_id is required.']);
