@@ -108,14 +108,14 @@ case '/sign-up':
 
                 case '/appointments':
                     if ($requestMethod === 'GET') {
-                        if (!isset($_SESSION['user_id'])) {
+                        /*if (!isset($_SESSION['user_id'])) {
                             http_response_code(401);
                             echo json_encode(['message' => 'Unauthorized: Please login to access this resource']);
                             exit;
-                        }
+                        }*/
                         
                         $serviceController = new ServiceController($pdo);
-                        $response = $serviceController->getAllAppointments();
+                        $response = $serviceController->getAllAppointments(); 
                         echo $response;
                     } else {
                         http_response_code(405);
