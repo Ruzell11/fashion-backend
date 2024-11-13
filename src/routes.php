@@ -1,5 +1,6 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:5501");
+//header("Access-Control-Allow-Origin: http://localhost:5501");
+header("Access-Control-Allow-Origin: *"); 
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT, PATCH");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json');
