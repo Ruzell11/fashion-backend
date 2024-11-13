@@ -65,7 +65,7 @@ class ServiceController {
             'customer_name' => $customerName,
             'phone_number' => $phoneNumber,
             'service_id' => $serviceId,
-            'appointment_date' => $appointmentDate  
+            'appointment_date' => $appointmentDate 
         ]);
     }
     
@@ -118,6 +118,37 @@ class ServiceController {
             return json_encode(['error' => 'Failed to fetch appointments. Please try again later.']);
         }
     }
+
+
+    public function getAppointmentById($appointment_id) {
+        try {
+            // Prepare SQL statement to fetch a specific appointment by its ID
+            $sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, 
+                           s.service_name, s.service_id, u.username, s.price 
+                    FROM appointments a
+                    JOIN salon_services s ON a.service_id = s.service_id
+                    JOIN users u ON a.user_id = u.id
+                    WHERE a.id = :appointment_id"; 
+    
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':appointment_id', $appointment_id, PDO::PARAM_INT); // Bind the appointment ID parameter
+            $stmt->execute();
+    
+            // Fetch the appointment for the given ID
+            $appointment = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            if ($appointment) {
+                return json_encode($appointment);
+            } else {
+                return json_encode(['message' => 'No appointment found with this ID.']);
+            }
+        } catch (PDOException $e) {
+            // Log error or return an error message
+            error_log("Error fetching appointment ID $appointment_id: " . $e->getMessage());
+            return json_encode(['error' => 'Failed to fetch appointment. Please try again later.']);
+        }
+    }
+    
     
     public function deleteAppointment($appointment_id) {
         try {
@@ -171,7 +202,22 @@ class ServiceController {
         // Optionally, return a success message or the number of rows affected
         return json_encode(['message' => 'Appointment updated successfully.']);
     }
-    
-    
 
+    public function markAppointmentAsDone($appointmentId) {
+        // Logic to update the is_done status in the appointments table
+        $sql = "UPDATE appointments SET is_done = 1 WHERE appointment_id = :appointment_id";
+    
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['appointment_id' => $appointmentId]);
+    
+        // Check if the row was updated
+        if ($stmt->rowCount() > 0) {
+            return json_encode(['message' => 'Appointment marked as done.']);
+        } else {
+            return json_encode(['message' => 'No appointment found with the provided ID.']);
+        }
+    }
+    
 }
+
+
