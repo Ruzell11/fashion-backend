@@ -69,13 +69,19 @@ class ServiceController {
         ]);
     }
     
-    public function getAllAppointments() {
+    public function getAllAppointments() { 
         // Prepare SQL statement to fetch all appointments
-        $sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, 
-                       s.service_name, u.username 
+        /*$sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, 
+                       s.service_name, u.username, a.is_done 
                 FROM appointments a
                 JOIN salon_services s ON a.service_id = s.service_id
-                JOIN users u ON a.user_id = u.id"; 
+                JOIN users u ON a.user_id = u.id"; */
+
+            $sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, 
+                    s.service_name, u.username, a.is_done 
+                    FROM appointments a
+                    JOIN salon_services s ON a.service_id = s.service_id
+                    JOIN users u ON a.user_id = u.id"; 
     
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
@@ -118,7 +124,6 @@ class ServiceController {
             return json_encode(['error' => 'Failed to fetch appointments. Please try again later.']);
         }
     }
-
 
     public function getAppointmentById($appointment_id) {
         try {
@@ -205,6 +210,7 @@ class ServiceController {
 
     public function markAppointmentAsDone($appointmentId) {
         // Logic to update the is_done status in the appointments table
+        //$sql = "UPDATE appointments SET is_done = 1 WHERE id = :id";
         $sql = "UPDATE appointments SET is_done = 1 WHERE id = :id";
     
         $stmt = $this->pdo->prepare($sql);

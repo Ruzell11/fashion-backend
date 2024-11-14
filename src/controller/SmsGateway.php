@@ -3,7 +3,7 @@
 class SmsGateway {
     function sendSmsMessage($message,$phoneNumbers) {
         // Define the API URL
-        $apiUrl = 'http://192.168.1.2:8080/message';
+        $apiUrl = 'http://192.168.0.28:8080/message';
     
         // Prepare the data to send in the POST request
         $data = [
@@ -20,7 +20,7 @@ class SmsGateway {
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data)); 
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Authorization: Basic ' . base64_encode('sms:zrzME7Tm') 
+            'Authorization: Basic ' . base64_encode('sms:CSxWfIRk') 
         ]);
     
         // Execute the cURL request and capture the response
