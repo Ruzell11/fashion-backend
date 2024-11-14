@@ -220,27 +220,13 @@ case '/sign-up':
                                 }
                                 break;
                                 case '/sms':
-                                    $smsGateway = new SmsGateway("AC0d3bdb56d2892b4dce8fcc7660a83dd4", "603b35e1bc093547dab3168b23647bcb", "639275079629");
-        
-                                    if ($requestMethod === 'POST') {
-                                        // Get the data from the request body
-                                        $data = json_decode(file_get_contents('php://input'), true);
-                            
-                                        // Check if `to` and `message` fields are provided
-                                        if (isset($data['to']) && isset($data['message'])) {
-                                            // Send SMS using the SmsGateway class
-                                            $smsResponse = $smsGateway->sendSms($data['to'], $data['message']);
-                                            echo json_encode(['status' => 'success', 'sms_status' => $smsResponse]);
-                                        } else {
-                                            http_response_code(400);
-                                            echo json_encode(['status' => 'error', 'message' => 'Bad Request: `to` and `message` are required.']);
-                                        }
-                                    } else {
-                                        http_response_code(405);
-                                        echo json_encode(['status' => 'error', 'message' => 'Method not allowed.']);
-                                    }
+                                    $smsGateway = new SmsGateway();
+                                    $data = json_decode(file_get_contents('php://input'), true);
+                                    $response = $smsGateway->sendSmsMessage($data['message'], $data['phone_numbers']);
+                                    echo json_encode($response);
+                                    
                                     break;
-
+                                
                             case '/payment':
                                 if ($requestMethod === 'POST') {
                                     // Get the data from the request body
