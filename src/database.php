@@ -14,7 +14,7 @@ function connectDatabase() {
       $host = getenv('DB_HOST') ?: 'localhost';
       $db = getenv('DB_NAME') ?: 'fashion_salon';
       $user = getenv('DB_USERNAME') ?: 'root';
-      $pass = getenv('DB_PASSWORD') ?: '12345678';
+      $pass = getenv('DB_PASSWORD') ?: '';
       $charset = 'utf8'; // Change from utf8mb4 to utf8
     
     $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

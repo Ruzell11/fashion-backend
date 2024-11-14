@@ -40,6 +40,9 @@ $basePath = '/fashion-backend';
 $uri = str_replace($basePath, '', $uri);
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
+// Debugging output
+error_log("Processed URI: " . $uri);
+error_log("Request method: " . $requestMethod);
 
 switch ($uri) {
 case '/sign-up':
