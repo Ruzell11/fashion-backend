@@ -205,10 +205,10 @@ class ServiceController {
 
     public function markAppointmentAsDone($appointmentId) {
         // Logic to update the is_done status in the appointments table
-        $sql = "UPDATE appointments SET is_done = 1 WHERE appointment_id = :appointment_id";
+        $sql = "UPDATE appointments SET is_done = 1 WHERE id = :id";
     
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(['appointment_id' => $appointmentId]);
+        $stmt->execute(['id' => $appointmentId]);
     
         // Check if the row was updated
         if ($stmt->rowCount() > 0) {

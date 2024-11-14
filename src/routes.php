@@ -15,6 +15,8 @@ require_once './src/database.php';
 require_once './src/controller/UserController.php';
 require_once './src/controller/ServiceController.php';
 require_once './src/controller/PaymentGateway.php';
+require_once './src/controller/SmsGateway.php';
+
 
 // Connect to the database
 $pdo = connectDatabase();
@@ -221,7 +223,14 @@ case '/sign-up':
                                     echo json_encode(['message' => 'Method not allowed.']);
                                 }
                                 break;
-
+                                case '/sms':
+                                    $smsGateway = new SmsGateway();
+                                    $data = json_decode(file_get_contents('php://input'), true);
+                                    $response = $smsGateway->sendSmsMessage($data['message'], $data['phone_numbers']);
+                                    echo json_encode($response);
+                                    
+                                    break;
+                                
                             case '/payment':
                                 if ($requestMethod === 'POST') {
                                     // Get the data from the request body
@@ -240,8 +249,8 @@ case '/sign-up':
                                             $name = 'Service ' . $appointmentDetails['service_name'] . rand(1, 1000000);
                                             $currency = 'PHP'; 
                                             $description = 'Payment for Appointment ID: ' . $appointmentDetails['service_name'];
-                                            $successUrl = 'http://127.0.0.1:5501/success.html'; 
-                                            $cancelUrl = 'http://127.0.0.1:5501/cancel.html';
+                                            $successUrl = 'http://127.0.0.1:5502/success.html'; 
+                                            $cancelUrl = 'http://127.0.0.1:5502/cancel.html';
                                         
                                             
                                             // Create an instance of PaymentGateway
