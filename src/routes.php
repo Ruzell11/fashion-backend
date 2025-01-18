@@ -1,11 +1,11 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:5501");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT, PATCH");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header('Content-Type: application/json');
-
+ header("Access-Control-Allow-Origin: *");
+ header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT, PATCH");
+ header("Access-Control-Allow-Headers: Content-Type, Authorization");
+ header('Content-Type: application/json');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-
+   
+    
 http_response_code(204); // Respond to OPTIONS requests with 204 No Content
 exit;
 }
@@ -43,6 +43,38 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 
 
 switch ($uri) {
+    case '/user':
+        if ($requestMethod === 'GET') {
+            // Initialize the UserController
+            $userController = new UserController($pdo);
+            
+            // Retrieve query parameters (e.g., ?user_id=1)
+            $queryParams = $_GET;
+    
+            // Check if 'user_id' is provided in the query parameters
+            if (isset($queryParams['user_id'])) {
+                $userId = intval($queryParams['user_id']); // Ensure 'user_id' is an integer
+    
+                // Fetch user data using the controller
+                $userData = $userController->getUserData($userId);
+    
+                if ($userData) {
+                    // Send the user data as a JSON response
+                    echo json_encode($userData);
+                } else {
+                    http_response_code(404);
+                    echo json_encode(['message' => 'User not found.']);
+                }
+            } else {
+                http_response_code(400);
+                echo json_encode(['message' => 'Missing required parameter: user_id.']);
+            }
+        } else {
+            http_response_code(405);
+            echo json_encode(['message' => 'Method not allowed.']);
+        }
+        break;
+    
 case '/sign-up':
     if ($requestMethod === 'POST') {
         

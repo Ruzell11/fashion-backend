@@ -22,7 +22,7 @@ class ServiceController {
         $userId = $formData['user_id'];
         $customerName = $formData['customer_name'] ?? null;
         $phoneNumber = $formData['phone_number'] ?? null;
-        $serviceId = $formData['service_id'] ?? null;
+        $serviceId = $formData['id'] ?? null;
         $appointmentDate = $formData['appointment_date'] ?? null;
     
         if (empty($customerName) || empty($phoneNumber) || empty($serviceId)) {
@@ -31,9 +31,9 @@ class ServiceController {
         }
     
         // Fetch service details from the database
-        $sql = "SELECT * FROM salon_services WHERE service_id = :service_id";
+        $sql = "SELECT * FROM salon_services WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':service_id', $serviceId);
+        $stmt->bindParam(':id', $serviceId);
         $stmt->execute();
         $service = $stmt->fetch(PDO::FETCH_ASSOC);
     
