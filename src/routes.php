@@ -74,7 +74,30 @@ switch ($uri) {
             echo json_encode(['message' => 'Method not allowed.']);
         }
         break;
-    
+        
+        case '/user':
+            if ($requestMethod === 'PATCH') {
+                // Initialize the UserController
+                $userController = new UserController($pdo);
+        
+                // Get the raw input data (e.g., JSON payload)
+                $inputData = json_decode(file_get_contents('php://input'), true);
+        
+                // Check if input data is valid
+                if (is_array($inputData)) {
+                    // Call the edit method to update user information
+                    $response = $userController->edit($inputData);
+                    echo $response; // Return the response from the edit method
+                } else {
+                    http_response_code(400);
+                    echo json_encode(['message' => 'Invalid input data.']);
+                }
+            } else {
+                http_response_code(405);
+                echo json_encode(['message' => 'Method not allowed.']);
+            }
+            break;
+        
 case '/sign-up':
     if ($requestMethod === 'POST') {
         
@@ -105,17 +128,23 @@ case '/sign-up':
         }
         break;
 
-    case '/services':
-        if ($requestMethod === 'GET') {
-      
+        case '/services':
+            if ($requestMethod === 'GET') {
+                // Check if there's a 'category' query parameter
+                $category = isset($_GET['category']) ? $_GET['category'] : null;
+        
+                // Instantiate the ServiceController and call getAllServices with or without a category
                 $serviceController = new ServiceController($pdo);
-                $response = $serviceController->getAllServices();
+                $response = $serviceController->getAllServices($category);
+        
+                // Return the response as JSON
                 echo json_encode($response);
             } else {
                 http_response_code(405);
                 echo json_encode(['message' => 'Method not allowed.']);
             }
             break;
+        
 
             case '/checkout':
                 if ($requestMethod === 'POST') {

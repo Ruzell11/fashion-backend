@@ -8,13 +8,30 @@ class ServiceController {
         $this->pdo = $pdo;
     }
 
-    public function getAllServices() {
+    public function getAllServices($category = null) {
+        // Start with the base SQL query
         $sql = "SELECT * FROM salon_services";
+        
+        // If a category is passed, add a WHERE clause to filter by category
+        if ($category) {
+            $sql .= " WHERE service_category = :category";
+        }
+    
+        // Prepare the SQL statement
         $stmt = $this->pdo->prepare($sql);
+    
+        // If category is provided, bind the parameter
+        if ($category) {
+            $stmt->bindParam(':category', $category, PDO::PARAM_STR);
+        }
+    
+        // Execute the query
         $stmt->execute();
+    
+        // Fetch and return the results as an associative array
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
+    
     public function proceedToCheckout($formData) {
 
     

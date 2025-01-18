@@ -52,6 +52,64 @@ class UserController {
             }
         }
     }
+    public function edit($data) {
+        // Check if the user_id is provided
+        if (!isset($data['user_id'])) {
+            http_response_code(400);
+            return json_encode(['message' => 'User ID is required.']);
+        }
+    
+        // Extract values from the input data
+        $userId = $data['user_id'];
+        $username = isset($data['username']) ? $data['username'] : null;
+        $email = isset($data['email']) ? $data['email'] : null;
+        $password = isset($data['password']) ? password_hash($data['password'], PASSWORD_DEFAULT) : null;
+    
+        // Build the SQL query dynamically based on provided fields
+        $fields = [];
+        $params = ['id' => $userId];
+    
+        if ($username !== null) {
+            $fields[] = 'username = :username';
+            $params['username'] = $username;
+        }
+        if ($email !== null) {
+            $fields[] = 'email = :email';
+            $params['email'] = $email;
+        }
+        if ($password !== null) {
+            $fields[] = 'password = :password';
+            $params['password'] = $password;
+        }
+    
+        // If no fields to update, return a bad request response
+        if (empty($fields)) {
+            http_response_code(400);
+            return json_encode(['message' => 'No fields to update.']);
+        }
+    
+        // Join fields for the SET clause
+        $sql = 'UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = :id';
+        $stmt = $this->pdo->prepare($sql);
+    
+        try {
+            // Execute the statement
+            $stmt->execute($params);
+    
+            // Check if the update was successful
+            if ($stmt->rowCount() > 0) {
+                http_response_code(200);
+                return json_encode(['message' => 'User information updated successfully.']);
+            } else {
+                // If no rows were affected, it means the user ID does not exist
+                http_response_code(404);
+                return json_encode(['message' => 'User not found or no changes made.']);
+            }
+        } catch (PDOException $e) {
+            http_response_code(500);
+            return json_encode(['message' => 'Internal server error.']);
+        }
+    }
     
     
 
