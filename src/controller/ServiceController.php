@@ -58,13 +58,13 @@ class ServiceController {
     
     private function createAppointment($userId, $customerName, $phoneNumber, $serviceId, $appointmentDate) {
         // Logic to create an appointment in the appointments table
-        $sql = "INSERT INTO appointments (user_id, customer_name, phone_number, service_id, appointment_date) VALUES (:user_id, :customer_name, :phone_number, :service_id, :appointment_date)";
+        $sql = "INSERT INTO appointments (user_id, customer_name, phone_number, id, appointment_date) VALUES (:user_id, :customer_name, :phone_number, :id, :appointment_date)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             'user_id' => $userId,
             'customer_name' => $customerName,
             'phone_number' => $phoneNumber,
-            'service_id' => $serviceId,
+            'id' => $serviceId,
             'appointment_date' => $appointmentDate 
         ]);
     }
@@ -74,7 +74,7 @@ class ServiceController {
         $sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, 
                        s.service_name, u.username 
                 FROM appointments a
-                JOIN salon_services s ON a.service_id = s.service_id
+                JOIN salon_services s ON a.id = s.id
                 JOIN users u ON a.user_id = u.id"; 
     
         $stmt = $this->pdo->prepare($sql);
@@ -94,9 +94,9 @@ class ServiceController {
         try {
             // Prepare SQL statement to fetch appointments for a specific user
             $sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, 
-                           s.service_name, s.service_id, u.username, s.price
+                           s.service_name, s.id, u.username, s.price
                     FROM appointments a
-                    JOIN salon_services s ON a.service_id = s.service_id
+                    JOIN salon_services s ON a.id = s.id
                     JOIN users u ON a.user_id = u.id
                     WHERE a.user_id = :user_id"; 
         
@@ -124,9 +124,9 @@ class ServiceController {
         try {
             // Prepare SQL statement to fetch a specific appointment by its ID
             $sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, 
-                           s.service_name, s.service_id, u.username, s.price 
+                           s.service_name, s.id, u.username, s.price 
                     FROM appointments a
-                    JOIN salon_services s ON a.service_id = s.service_id
+                    JOIN salon_services s ON a.id = s.id
                     JOIN users u ON a.user_id = u.id
                     WHERE a.id = :appointment_id"; 
     
@@ -176,7 +176,7 @@ class ServiceController {
         // Extract data from the input array
         $customerName = $data['customer_name'];
         $phoneNumber = $data['phone_number'];
-        $serviceId = $data['service_id'];
+        $serviceId = $data['id'];
         $appointmentDate = $data['appointment_date'];
         $appointmentId = $data['appointment_id'];
     
@@ -184,7 +184,7 @@ class ServiceController {
         $sql = "UPDATE appointments 
                 SET phone_number = :phone_number, 
                     customer_name = :customer_name,
-                    service_id = :service_id, 
+                    id = :id, 
                     appointment_date = :appointment_date 
                 WHERE id = :appointment_id";
         
@@ -194,7 +194,7 @@ class ServiceController {
         $stmt->execute([
             'customer_name' => $customerName,
             'phone_number' => $phoneNumber,
-            'service_id' => $serviceId,
+            'id' => $serviceId,
             'appointment_date' => $appointmentDate,
             'appointment_id' => $appointmentId
         ]);
