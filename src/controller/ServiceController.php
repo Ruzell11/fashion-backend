@@ -75,13 +75,13 @@ class ServiceController {
     
     private function createAppointment($userId, $customerName, $phoneNumber, $serviceId, $appointmentDate) {
         // Logic to create an appointment in the appointments table
-        $sql = "INSERT INTO appointments (user_id, customer_name, phone_number, id, appointment_date) VALUES (:user_id, :customer_name, :phone_number, :id, :appointment_date)";
+        $sql = "INSERT INTO appointments (user_id, customer_name, phone_number, service_id, appointment_date) VALUES (:user_id, :customer_name, :phone_number, :service_id, :appointment_date)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             'user_id' => $userId,
             'customer_name' => $customerName,
             'phone_number' => $phoneNumber,
-            'id' => $serviceId,
+            'service_id' => $serviceId,
             'appointment_date' => $appointmentDate 
         ]);
     }
@@ -110,13 +110,19 @@ class ServiceController {
     public function getAllAppointmentsByUser($user_id) {
         try {
             // Prepare SQL statement to fetch appointments for a specific user
-            $sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, 
-                           s.service_name, s.id, u.username, s.price
-                    FROM appointments a
-                    JOIN salon_services s ON a.id = s.id
-                    JOIN users u ON a.user_id = u.id
-                    WHERE a.user_id = :user_id"; 
-        
+            $sql = "SELECT a.id AS appointment_id, 
+            a.customer_name, 
+            a.phone_number, 
+            a.appointment_date, 
+            s.service_name, 
+            s.id AS service_id, 
+            u.username, 
+            s.price
+     FROM appointments a
+     JOIN salon_services s ON a.service_id = s.id
+     JOIN users u ON a.user_id = u.id
+     WHERE a.user_id = :user_id"; 
+
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT); // Bind the user ID parameter
             $stmt->execute();
@@ -140,10 +146,10 @@ class ServiceController {
     public function getAppointmentById($appointment_id) {
         try {
             // Prepare SQL statement to fetch a specific appointment by its ID
-            $sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, 
+            $sql = "SELECT a.id, a.customer_name, a.phone_number, a.appointment_date, a.service_id, 
                            s.service_name, s.id, u.username, s.price 
                     FROM appointments a
-                    JOIN salon_services s ON a.id = s.id
+                    JOIN salon_services s ON a.service_id = s.id
                     JOIN users u ON a.user_id = u.id
                     WHERE a.id = :appointment_id"; 
     
@@ -190,18 +196,20 @@ class ServiceController {
 
 
     public function editAppointment($data) {
+
+        var_dump($data);
         // Extract data from the input array
         $customerName = $data['customer_name'];
         $phoneNumber = $data['phone_number'];
-        $serviceId = $data['id'];
+        $serviceId = (int)$data['service_id'];
         $appointmentDate = $data['appointment_date'];
-        $appointmentId = $data['appointment_id'];
+        $appointmentId =(int)$data['appointment_id'];
     
         // SQL query to update the appointment
         $sql = "UPDATE appointments 
                 SET phone_number = :phone_number, 
                     customer_name = :customer_name,
-                    id = :id, 
+                    service_id = :service_id, 
                     appointment_date = :appointment_date 
                 WHERE id = :appointment_id";
         
@@ -211,7 +219,7 @@ class ServiceController {
         $stmt->execute([
             'customer_name' => $customerName,
             'phone_number' => $phoneNumber,
-            'id' => $serviceId,
+            'service_id' => $serviceId,
             'appointment_date' => $appointmentDate,
             'appointment_id' => $appointmentId
         ]);
