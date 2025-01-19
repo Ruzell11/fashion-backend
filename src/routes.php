@@ -75,7 +75,7 @@ switch ($uri) {
         }
         break;
         
-        case '/user':
+        case '/user/edit':
             if ($requestMethod === 'PATCH') {
                 // Initialize the UserController
                 $userController = new UserController($pdo);

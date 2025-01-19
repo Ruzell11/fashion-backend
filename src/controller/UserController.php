@@ -53,46 +53,63 @@ class UserController {
         }
     }
     public function edit($data) {
-        // Check if the user_id is provided
-        if (!isset($data['user_id'])) {
+        // Check if the user_id and current_password are provided
+        if (!isset($data['user_id']) || !isset($data['current_password'])) {
             http_response_code(400);
-            return json_encode(['message' => 'User ID is required.']);
+            return json_encode(['message' => 'User ID and current password are required.']);
         }
     
         // Extract values from the input data
         $userId = $data['user_id'];
+        $currentPassword = $data['current_password'];
         $username = isset($data['username']) ? $data['username'] : null;
         $email = isset($data['email']) ? $data['email'] : null;
-        $password = isset($data['password']) ? password_hash($data['password'], PASSWORD_DEFAULT) : null;
-    
-        // Build the SQL query dynamically based on provided fields
-        $fields = [];
-        $params = ['id' => $userId];
-    
-        if ($username !== null) {
-            $fields[] = 'username = :username';
-            $params['username'] = $username;
-        }
-        if ($email !== null) {
-            $fields[] = 'email = :email';
-            $params['email'] = $email;
-        }
-        if ($password !== null) {
-            $fields[] = 'password = :password';
-            $params['password'] = $password;
-        }
-    
-        // If no fields to update, return a bad request response
-        if (empty($fields)) {
-            http_response_code(400);
-            return json_encode(['message' => 'No fields to update.']);
-        }
-    
-        // Join fields for the SET clause
-        $sql = 'UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = :id';
-        $stmt = $this->pdo->prepare($sql);
+        $newPassword = isset($data['new_password']) ? $data['new_password'] : null;
     
         try {
+            // Fetch the current password from the database
+            $stmt = $this->pdo->prepare('SELECT password FROM users WHERE id = :id');
+            $stmt->execute(['id' => $userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            if (!$user) {
+                http_response_code(404);
+                return json_encode(['message' => 'User not found.']);
+            }
+    
+            // Verify the current password
+            if (!password_verify($currentPassword, $user['password'])) {
+                http_response_code(403);
+                return json_encode(['message' => 'Current password is incorrect.']);
+            }
+    
+            // Prepare fields for update
+            $fields = [];
+            $params = ['id' => $userId];
+    
+            if ($username !== null) {
+                $fields[] = 'username = :username';
+                $params['username'] = $username;
+            }
+            if ($email !== null) {
+                $fields[] = 'email = :email';
+                $params['email'] = $email;
+            }
+            if ($newPassword !== null) {
+                $fields[] = 'password = :password';
+                $params['password'] = password_hash($newPassword, PASSWORD_DEFAULT);
+            }
+    
+            // If no fields to update, return a bad request response
+            if (empty($fields)) {
+                http_response_code(400);
+                return json_encode(['message' => 'No fields to update.']);
+            }
+    
+            // Join fields for the SET clause
+            $sql = 'UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = :id';
+            $stmt = $this->pdo->prepare($sql);
+    
             // Execute the statement
             $stmt->execute($params);
     
@@ -101,15 +118,15 @@ class UserController {
                 http_response_code(200);
                 return json_encode(['message' => 'User information updated successfully.']);
             } else {
-                // If no rows were affected, it means the user ID does not exist
                 http_response_code(404);
-                return json_encode(['message' => 'User not found or no changes made.']);
+                return json_encode(['message' => 'No changes were made.']);
             }
         } catch (PDOException $e) {
             http_response_code(500);
             return json_encode(['message' => 'Internal server error.']);
         }
     }
+    
     
     
 
@@ -137,7 +154,7 @@ class UserController {
                 $_SESSION['email'] = $user['email'];
     
                 http_response_code(200);
-                return json_encode(['message' => 'Login successful', 'user_id' => $_SESSION['user_id']]);
+                return json_encode(['message' => 'Login successful', 'user_id' => $_SESSION['user_id'], 'user'=> $user]);
             } else {
                 // Authentication failed
                 http_response_code(401);
@@ -151,7 +168,7 @@ class UserController {
 
     public function isAuthenticated($user_id, $pdo) {
 
-        var_dump($user_id);
+ 
         // Prepare SQL statement to find the user by user_id
         $stmt = $pdo->prepare('SELECT * FROM users WHERE id = :user_id LIMIT 1');
     
