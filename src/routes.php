@@ -97,6 +97,29 @@ switch ($uri) {
                 echo json_encode(['message' => 'Method not allowed.']);
             }
             break;
+
+            case '/paid':
+                if ($requestMethod === 'PATCH') {
+                
+                    $serviceController = new ServiceController($pdo);
+            
+               
+                    $inputData = json_decode(file_get_contents('php://input'), true);
+            
+                    // Check if input data is valid
+                    if (is_array($inputData)) {
+               
+                        $response = $serviceController->isPaid($inputData);
+                        echo $response;
+                    } else {
+                        http_response_code(400);
+                        echo json_encode(['message' => 'Invalid input data.']);
+                    }
+                } else {
+                    http_response_code(405);
+                    echo json_encode(['message' => 'Method not allowed.']);
+                }
+                break;
         
 case '/sign-up':
     if ($requestMethod === 'POST') {
@@ -306,7 +329,7 @@ case '/sign-up':
                                             $name = 'Service ' . $appointmentDetails['service_name'] . rand(1, 1000000);
                                             $currency = 'PHP'; 
                                             $description = 'Payment for Appointment ID: ' . $appointmentDetails['service_name'];
-                                            $successUrl = 'http://127.0.0.1:5502/success.html'; 
+                                            $successUrl = 'http://127.0.0.1:5502/success.html?payment_status=success&appointment_id=' . $data['appointment_id']; 
                                             $cancelUrl = 'http://127.0.0.1:5502/cancel.html';
                                         
                                             

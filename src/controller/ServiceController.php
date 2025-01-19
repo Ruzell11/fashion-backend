@@ -39,7 +39,7 @@ class ServiceController {
         $userId = $formData['user_id'];
         $customerName = $formData['customer_name'] ?? null;
         $phoneNumber = $formData['phone_number'] ?? null;
-        $serviceId = $formData['id'] ?? null;
+        $serviceId = $formData['service_id'] ?? null;
         $appointmentDate = $formData['appointment_date'] ?? null;
     
         if (empty($customerName) || empty($phoneNumber) || empty($serviceId)) {
@@ -114,6 +114,7 @@ class ServiceController {
             a.customer_name, 
             a.phone_number, 
             a.appointment_date, 
+            a.is_paid,
             s.service_name, 
             s.id AS service_id, 
             u.username, 
@@ -242,6 +243,42 @@ class ServiceController {
             return json_encode(['message' => 'No appointment found with the provided ID.']);
         }
     }
+
+
+    public function isPaid($data) {
+    
+    
+        $appointmentId = $data['appointment_id'];
+    
+        // Prepare the SQL query to update the is_paid field
+        $sql = "UPDATE appointments SET is_paid = 1 WHERE id = :appointment_id";
+        
+        try {
+     
+            $stmt = $this->pdo->prepare($sql);
+            
+            // Bind the appointment ID to the placeholder
+            $stmt->bindParam(':appointment_id', $appointmentId, PDO::PARAM_INT);
+            
+   
+            $stmt->execute();
+    
+          
+            if ($stmt->rowCount() > 0) {
+                return json_encode(['status' => 'success']);
+            } else {
+                return json_encode(['status' => 'error', 'message' => 'Appointment not found or already marked as paid']);
+            }
+        } catch (PDOException $e) {
+            // Catch any exceptions and return an error message
+            return json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+    
+    
+   
+
+    
     
 }
 
